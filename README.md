@@ -1,57 +1,49 @@
+<div align="center">
+
 # Absen QR
 
-Absensi kelas dengan kode yang **berputar tiap 30 detik**. Kode yang difoto lalu
-dikirim ke teman sudah kedaluwarsa sebelum sempat dipakai.
+**Absensi kelas dengan kode yang berputar tiap 30 detik — kode yang difoto sudah kedaluwarsa.**
 
-Demo: buka halaman, pilih tab **Dosen** untuk melihat kode, lalu tab
-**Mahasiswa** untuk mengisinya.
+[![Demo](https://img.shields.io/badge/demo-live-b45309?style=flat-square)](https://atmajadesna.github.io/absen-qr/)
+![Tanpa build step](https://img.shields.io/badge/build-tanpa%20build%20step-2f6f4f?style=flat-square)
+![Lisensi MIT](https://img.shields.io/badge/lisensi-MIT-1f4e79?style=flat-square)
 
-## Cara kerja
+<a href="https://atmajadesna.github.io/absen-qr/"><img src="docs/screenshot.jpg" alt="Tangkapan layar Absen QR" width="100%"></a>
 
-1. Saat pertama dibuka, halaman membuat **kunci sesi acak 128-bit** dan
-   menyimpannya di `localStorage`.
-2. Kode 6 karakter diturunkan dari kunci itu dengan **HMAC-SHA256**, dengan
-   nomor jendela waktu sebagai pesan:
-   `kode = base32(HMAC(kunci, "w:" + floor(now / 30000)))`.
-3. Kode berganti otomatis setiap 30 detik. Jendela **sebelumnya** masih
-   diterima, supaya yang memindai di detik terakhir tidak langsung gagal.
-4. Nama ganda di jendela yang sama ditolak.
+</div>
 
-Alfabet kode memakai Crockford base32 (`0-9`, `A-Z` tanpa `I`, `L`, `O`, `U`)
-agar tidak salah baca saat diketik manual.
+## Masalahnya
 
-## Struktur berkas
+Absen pakai kode statis gampang dititipkan: foto kode hari ini, kirim ke teman, besok masih bisa dipakai. Absen pakai QR biasa juga sama — gambarnya bisa disimpan.
 
-| Berkas | Isi |
-|---|---|
-| `index.html` | dua panel: dosen dan mahasiswa |
-| `tokens.css` | token warna, ukuran huruf, jarak, easing |
-| `styles.css` | tata letak dan komponen |
-| `app.js` | pembuatan kode, validasi, daftar hadir |
+## Yang menarik di dalamnya
 
-Tanpa build step, tanpa dependensi kecuali satu pustaka QR dari CDN
-(`qrcode-generator`). Kalau CDN gagal dimuat, kode teks tetap tampil dan
-halaman memberi tahu bahwa QR tidak tersedia.
+**Kode turunan waktu** — `kode = base32(HMAC-SHA256(kunci, "w:" + floor(now/30000)))`. Tanpa kunci, kode tidak bisa dihitung, jadi tidak bisa ditebak dari jam.
+**Jendela 30 detik** — Jendela sebelumnya masih diterima supaya mahasiswa yang telat beberapa detik tidak gagal absen.
+**Nama ganda ditolak** — Satu nama hanya bisa absen sekali per sesi.
+**Kunci di perangkat** — Kunci 128-bit dan log absensi disimpan di `localStorage`, jadi tidak ada server yang perlu dipercaya.
 
-## Batasan
+## Jalanin
 
-Ini demo **tanpa server**. Kunci sesi ada di perangkat yang sama, jadi secara
-teknis kode bisa dihitung sendiri oleh siapa pun yang membuka DevTools.
-
-Untuk dipakai sungguhan, kode harus diverifikasi di server:
-
-- kunci sesi disimpan di server, bukan di browser;
-- mahasiswa mengirim kode, server yang membandingkan;
-- satu mahasiswa hanya boleh tercatat sekali per sesi;
-- kode sebaiknya ditandatangani dengan waktu server, bukan waktu perangkat.
-
-## Menjalankan lokal
+Buka `index.html` di browser. Tidak ada build step.
 
 ```bash
 python3 -m http.server 8000
-# buka http://localhost:8000
 ```
 
-## Lisensi
+Tidak ada dependency, tidak ada build step. Semua jalan di browser.
 
-MIT.
+## Struktur
+
+```
+index.html    tampilan dan struktur halaman
+app.js        seluruh logika: data, hitungan, penyimpanan
+styles.css    tata letak dan komponen
+tokens.css    warna, ukuran teks, dan spasi sebagai variabel
+```
+
+## Catatan
+
+Ini demo sisi klien: kode dihitung di browser dosen. Untuk pemakaian nyata, verifikasi harus pindah ke server supaya kuncinya tidak ikut terkirim.
+
+Dibuat dengan JavaScript, Web Crypto, HTML, tanpa framework.
