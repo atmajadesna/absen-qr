@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Absen QR — absensi kelas dengan kode berputar</title>
+<meta name="description" content="Kode absensi berubah tiap 30 detik. Kode lama otomatis kedaluwarsa, jadi absensi tidak bisa dititipkan.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="shell">
+
+  <header class="topbar">
+    <span class="brand"><span class="brand__dot" aria-hidden="true"></span>absen.qr</span>
+    <div class="modes" role="tablist" aria-label="Pilih peran">
+      <button class="modes__btn" role="tab" id="tab-dosen" aria-selected="true" aria-controls="panel-dosen">Dosen</button>
+      <button class="modes__btn" role="tab" id="tab-mhs" aria-selected="false" aria-controls="panel-mhs">Mahasiswa</button>
+    </div>
+  </header>
+
+  <section class="intro">
+    <h1>Absensi yang tidak bisa dititipkan.</h1>
+    <p>Kode berubah tiap 30 detik. Yang difoto temanmu sudah kedaluwarsa sebelum sampai.</p>
+  </section>
+
+  <!-- ============ DOSEN ============ -->
+  <section id="panel-dosen" role="tabpanel" aria-labelledby="tab-dosen">
+    <div class="bench">
+      <div class="panel">
+        <p class="panel__label">Sesi aktif · kode berputar</p>
+        <div class="sesi">
+          <canvas id="qr" width="168" height="168" aria-label="Kode QR absensi"></canvas>
+          <div class="sesi__info">
+            <div class="code" id="kode">------</div>
+            <p class="hint">Tunjukkan layar ini ke kelas. Kode dan QR berganti bersamaan.</p>
+            <div class="timer">
+              <div class="timer__track"><div class="timer__fill" id="timer-fill"></div></div>
+              <div class="timer__meta">
+                <span id="timer-text">30 detik lagi</span>
+                <span id="sesi-id">sesi —</span>
+              </div>
+            </div>
+            <p class="hint" id="qr-fallback" hidden>
+              QR tidak bisa dimuat (offline). Kode teks tetap bisa dipakai.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <p class="panel__label">Hadir tercatat</p>
+        <ul class="log" id="log-dosen">
+          <li class="log__empty">Belum ada yang absen.</li>
+        </ul>
+        <button class="btn btn--ghost" id="reset" style="margin-top: var(--space-4)">Kosongkan daftar</button>
+      </div>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <p class="step__num">LANGKAH 01</p>
+        <h3>Buka sesi</h3>
+        <p>Halaman ini membuat kunci sesi acak di perangkat. Kode diturunkan dari kunci itu, bukan dari daftar yang disimpan.</p>
+      </div>
+      <div class="step">
+        <p class="step__num">LANGKAH 02</p>
+        <h3>Tayangkan kode</h3>
+        <p>Setiap 30 detik kode berganti. Jendela sebelumnya masih diterima 30 detik supaya yang telat memindai tidak langsung gagal.</p>
+      </div>
+      <div class="step">
+        <p class="step__num">LANGKAH 03</p>
+        <h3>Periksa daftar</h3>
+        <p>Nama yang masuk tercatat dengan jam dan nomor jendela. Nama ganda di jendela yang sama ditolak.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MAHASISWA ============ -->
+  <section id="panel-mhs" role="tabpanel" aria-labelledby="tab-mhs" hidden>
+    <div class="bench">
+      <div class="panel">
+        <p class="panel__label">Isi kehadiran</p>
+        <form id="form-absen" novalidate>
+          <div class="field">
+            <label for="nama">Nama</label>
+            <input id="nama" name="nama" type="text" autocomplete="name" placeholder="Nama lengkap" required>
+          </div>
+          <div class="field">
+            <label for="kode-input">Kode dari layar</label>
+            <input id="kode-input" name="kode" type="text" inputmode="text" autocapitalize="characters"
+                   autocomplete="off" maxlength="8" placeholder="6 karakter" required>
+          </div>
+          <button class="btn" type="submit" id="btn-absen">Catat kehadiran</button>
+          <p class="status" id="status" role="status" aria-live="polite">Menunggu kode.</p>
+        </form>
+      </div>
+
+      <div class="panel">
+        <p class="panel__label">Daftar hadir</p>
+        <ul class="log" id="log-mhs">
+          <li class="log__empty">Belum ada yang absen.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Demo tanpa server — kunci sesi disimpan di perangkat ini.</span>
+    <span>Verifikasi produksi harus di server.</span>
+  </footer>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js" defer></script>
+<script src="app.js" defer></script>
+</body>
+</html>
